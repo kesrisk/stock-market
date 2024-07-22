@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session {{ session.id }}</title>
+</head>
+<body>
+    <h1>Session {{ session.id }}</h1>
+
+    {% if session_user and session_user.role == 'editor' or current_user.role == 'superuser' %}
+    <form method="POST">
+        <input type="hidden" name="field" value="sbi">
+        <label for="sbi">SBI:</label>
+        <input type="number" id="sbi" name="value" placeholder="Add value">
+        <button type="submit">Update SBI</button>
+    </form>
+    <form method="POST">
+        <input type="hidden" name="field" value="reliance">
+        <label for="reliance">Reliance:</label>
+        <input type="number" id="reliance" name="value" placeholder="Add value">
+        <button type="submit">Update Reliance</button>
+    </form>
+    <form method="POST">
+        <input type="hidden" name="field" value="hdfc">
+        <label for="hdfc">HDFC:</label>
+        <input type="number" id="hdfc" name="value" placeholder="Add value">
+        <button type="submit">Update HDFC</button>
+    </form>
+    <form method="POST">
+        <input type="hidden" name="field" value="infy">
+        <label for="infy">INFY:</label>
+        <input type="number" id="infy" name="value" placeholder="Add value">
+        <button type="submit">Update INFY</button>
+    </form>
+    <form method="POST">
+        <input type="hidden" name="field" value="nifty">
+        <label for="nifty">Nifty:</label>
+        <input type="number" id="nifty" name="value" placeholder="Add value">
+        <button type="submit">Update Nifty</button>
+    </form>
+    <form method="POST">
+        <input type="hidden" name="field" value="tata">
+        <label for="tata">Tata:</label>
+        <input type="number" id="tata" name="value" placeholder="Add value">
+        <button type="submit">Update Tata</button>
+    </form>
+    <form method="POST">
+        <input type="hidden" name="field" value="hul">
+        <label for="hul">HUL:</label>
+        <input type="number" id="hul" name="value" placeholder="Add value">
+        <button type="submit">Update HUL</button>
+    </form>
+    {% endif %}
+
+    <h2>Current Values</h2>
+    <p>SBI: {{ session.sbi }}</p>
+    <p>Reliance: {{ session.reliance }}</p>
+    <p>HDFC: {{ session.hdfc }}</p>
+    <p>INFY: {{ session.infy }}</p>
+    <p>Nifty: {{ session.nifty }}</p>
+    <p>Tata: {{ session.tata }}</p>
+    <p>HUL: {{ session.hul }}</p>
+
+    <h2>Update History</h2>
+    <ul>
+        {% for update in update_history %}
+        <li>
+            {{ update.timestamp }}: {{ update.field }} changed from {{ update.old_value }} to {{ update.new_value }} (Change: {{ update.change_value }})
+            {% if update.reverted %}
+                <strong>(Reverted)</strong>
+            {% else %}
+                {% if session_user and session_user.role == 'editor' or current_user.role == 'superuser' %}
+                <form action="{{ url_for('revert_update', update_id=update.id) }}" method="POST" style="display:inline;">
+                    <button type="submit">Revert</button>
+                </form>
+                {% endif %}
+            {% endif %}
+            {% if update.revert_comment %}
+                <em>{{ update.revert_comment }}</em>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+
+    {% if session_user and session_user.role == 'editor' or current_user.role == 'superuser' %}
+    <h2>Share Session</h2>
+    <form method="POST" action="{{ url_for('share_session', session_id=session.id) }}">
+        <label for="phone_number">User Phone Number:</label>
+        <input type="text" id="phone_number" name="phone_number" required>
+        <br>
+        <label for="role">Role:</label>
+        <select id="role" name="role" required>
+            <option value="editor">Editor</option>
+            <option value="viewer">Viewer</option>
+        </select>
+        <br>
+        <button type="submit">Share Session</button>
+    </form>
+    {% endif %}
+
+    <h2>Users with Access</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Role</th>
+                {% if session_user and session_user.role == 'editor' or current_user.role == 'superuser' %}
+                <th>Actions</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for su in session.users %}
+            <tr>
+                <td>{{ su.user.name }}</td>
+                <td>{{ su.role }}</td>
+                {% if session_user and session_user.role == 'editor' or current_user.role == 'superuser' %}
+                <td>
+                    <form method="POST" action="{{ url_for('remove_user_from_session', session_id=session.id, user_id=su.user.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to remove this user?');">
+                        <button type="submit">Remove</button>
+                    </form>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+</html>

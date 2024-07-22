@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Superuser Home</title>
+</head>
+<body>
+    <h1>Welcome, Superuser</h1>
+
+    <h2>All Users</h2>
+    <ul>
+        {% for user in users %}
+        <li>{{ user.name }} - {{ user.phone_number }} ({{ user.role }})</li>
+        {% endfor %}
+    </ul>
+
+    <h2>All Sessions</h2>
+    <ul>
+        {% for session in sessions %}
+        <li><a href="{{ url_for('view_session', session_id=session.id) }}">Session {{ session.id }}</a></li>
+        {% endfor %}
+    </ul>
+
+    <h2>Start New Session</h2>
+    <form action="{{ url_for('start_session') }}" method="post">
+        <button type="submit">Start Session</button>
+    </form>
+
+    <a href="{{ url_for('logout') }}">Logout</a>
+</body>
+</html>
